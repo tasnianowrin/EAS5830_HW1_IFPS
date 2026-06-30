@@ -1,38 +1,36 @@
 import requests
 import json
 
-PROJECT_ID = "PMy First Key"
-PROJECT_SECRET = "XI7jDQtwaUApzU+hjw4HxcPksdmmMU5rZOy+VMLi5Y3iw7kwaMapmw"
+PINATA_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI5MmJlYjE4OS1hYWE0LTQ4NjYtOTZmMi02ZmUyMTc3NDI5OTEiLCJlbWFpbCI6Im5vd3JpbnRAc2Vhcy51cGVubi5lZHUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiOWJlY2JiNzE3YjliN2IxMDVjNzMiLCJzY29wZWRLZXlTZWNyZXQiOiJhYTRlZTIxNTUyZjZiYmFlMTJkMjRiNTcwYTJlOGQzMmE3MTllZDM5NGZmYzA0ZTNkNjZmNzIwZDliZTgzOTUzIiwiZXhwIjoxODE0MzI1NTI3fQ.5k08HjRjPfNJkGM-vYZAbXuBbIry_eGa9PZPor2K6PY"
+
 
 def pin_to_ipfs(data):
-	assert isinstance(data,dict), f"Error pin_to_ipfs expects a dictionary"
-	#YOUR CODE HERE
-	url = "https://ipfs.infura.io:5001/api/v0/add"
+    assert isinstance(data, dict), f"Error pin_to_ipfs expects a dictionary"
 
-	files = {
-	"file": ("data.json", json.dumps(data), "application/json")
-	}
+    url = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
 
-	response = requests.post(
-	url,
-	files=files,
-	auth=(PROJECT_ID, PROJECT_SECRET)
-	)
+    headers = {
+        "Authorization": f"Bearer {PINATA_JWT}",
+        "Content-Type": "application/json"
+    }
 
-	response.raise_for_status()
-	cid = response.json()["Hash"]
-	return cid
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
 
-def get_from_ipfs(cid,content_type="json"):
-	assert isinstance(cid,str), f"get_from_ipfs accepts a cid in the form of a string"
-	#YOUR CODE HERE	
+    cid = response.json()["IpfsHash"]
 
-	url = f"https://ipfs.io/ipfs/{cid}"
+    return cid
 
-	response = requests.get(url)
-	response.raise_for_status()
 
-	data = response.json()
+def get_from_ipfs(cid, content_type="json"):
+    assert isinstance(cid, str), f"get_from_ipfs accepts a cid in the form of a string"
 
-	assert isinstance(data,dict), f"get_from_ipfs should return a dict"
-	return data
+    url = f"https://gateway.pinata.cloud/ipfs/{cid}"
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    data = response.json()
+
+    assert isinstance(data, dict), f"get_from_ipfs should return a dict"
+    return data
